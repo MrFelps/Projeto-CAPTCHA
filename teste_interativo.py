@@ -2,7 +2,7 @@
 # CÉLULA 1: Captura de tela e criação do DataFrame original
 # Execute esta célula primeiro para criar a variável 'df'.
 
-from capt import get_screenshot_tesser
+from CaptchaClick import get_screenshot_tesser
 import time
 import pandas as pd
 import rapidfuzz
