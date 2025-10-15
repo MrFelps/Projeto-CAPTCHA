@@ -17,13 +17,14 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Arquivos de Programas\Tesseract-OCR
 def get_screenshot_tesser(minlen=2):
     img_pil = ImageGrab.grab() # Tira o screenshot da tela principal inteira
     img = np.array(img_pil)
-    df = pytesseract.image_to_data(img, lang='por', output_type=pytesseract.Output.DATAFRAME)
+    # Alterado para 'eng' para melhor reconhecimento do texto em inglês
+    df = pytesseract.image_to_data(img, lang='eng', output_type=pytesseract.Output.DATAFRAME)
     df = df.dropna(subset=["text"])
     df = df.loc[df.text.str.len() > minlen].reset_index(drop=True)
     return df
 
 
-# --- Execução Principal do Robô (Lógica Visual) ---
+# --- Execução Principal do Robô (Lógica Visual Corrigida) ---
 if __name__ == "__main__":
     print("Iniciando automação em 4 segundos... Deixe a página do CAPTCHA visível.")
     time.sleep(4)
@@ -36,19 +37,20 @@ if __name__ == "__main__":
     else:
         print("Tela analisada. Procurando pelo alvo...")
         
-        # 2. Procura pela palavra 'sou' com o RapidFuzz
-        palavra_alvo, pontuacao, indice = rapidfuzz.process.extractOne("sou", df['text'])
+        # 2. Procura pela palavra 'robot' (ALVO CORRIGIDO)
+        palavra_alvo, pontuacao, indice = rapidfuzz.process.extractOne("robot", df['text'])
         
         # 3. Verifica se a confiança é alta o suficiente para clicar
-        if pontuacao > 60: # Usamos 70 como um bom nível de confiança
+        if pontuacao > 80: # Aumentamos a confiança para ter mais certeza
             info_alvo = df.iloc[indice]
             coord_x = info_alvo['left']
             coord_y = info_alvo['top']
             
             print(f"Alvo '{palavra_alvo}' encontrado com {pontuacao:.2f}% de certeza em ({coord_x}, {coord_y})")
 
-            # 4. Calcula as coordenadas do clique (à esquerda da palavra 'sou')
-            click_x = coord_x - 30 
+            # 4. Calcula as coordenadas do clique (DISTÂNCIA CORRIGIDA)
+            # Uma distância maior para a esquerda, partindo da palavra 'robot'
+            click_x = coord_x - 100
             click_y = coord_y + 10 
             
             print(f"Movendo o mouse de forma humana para ({click_x}, {click_y}) e clicando...")
@@ -63,5 +65,5 @@ if __name__ == "__main__":
             
             print("CAPTCHA acionado!")
         else:
-            print(f"[INFO] A pontuação encontrada ({pontuacao:.2f}%) foi menor que o mínimo. O mouse não foi movido.")
+            print(f"[INFO] O alvo 'robot' não foi encontrado com confiança suficiente ({pontuacao:.2f}%).")
             print("[DICA] Verifique se a página do CAPTCHA estava totalmente visível na tela principal.")
